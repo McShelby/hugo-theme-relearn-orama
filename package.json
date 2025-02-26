@@ -1,0 +1,24 @@
+{
+  "name": "relearn-orama",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx webpack"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "babel-loader": "^9.2.1",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "@orama/orama": "3.0.8",
+    "@orama/plugin-pt15": "3.0.8",
+    "@orama/plugin-qps": "3.0.8"
+  }
+}
