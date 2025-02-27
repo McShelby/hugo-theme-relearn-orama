@@ -1,6 +1,6 @@
 # Hugo Theme Relearn Orama Search Adapter
 
-Bundles the Orama search library into a single JavaScript file for consumption in the Hugo Relearn theme.
+Bundles the [Orama](https://orama.com) search library into a single JavaScript file for consumption in the Hugo [Relearn](https://mcshelby.github.io/hugo-theme-relearn) theme.
 
 ## Usage
 
