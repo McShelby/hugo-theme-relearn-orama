@@ -19,6 +19,7 @@
   "dependencies": {
     "@orama/orama": "3.0.8",
     "@orama/plugin-pt15": "3.0.8",
-    "@orama/plugin-qps": "3.0.8"
+    "@orama/plugin-qps": "3.0.8",
+    "@orama/stemmers": "3.0.8"
   }
 }

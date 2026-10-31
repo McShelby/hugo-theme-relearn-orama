@@ -1,6 +1,7 @@
 import { create, search as oramaSearch, insertMultiple } from '@orama/orama';
 import { pluginQPS } from '@orama/plugin-qps';
 import { pluginPT15 } from '@orama/plugin-pt15';
+import { stemmer, language } from "@orama/stemmers/english";
 //import { pluginEmbeddings } from 'https://cdn.jsdelivr.net/npm/@orama/plugin-embeddings@3.0.8.js'
 //import * as tf from 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core';
 //import 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl';
@@ -52,6 +53,13 @@ async function init() {
 				},
 			},
 	*/
+      components: {
+        tokenizer: {
+          stemming: true,
+          language,
+          stemmer,
+        },
+      },
     });
     await insertMultiple(searchEngine, index);
 
@@ -93,7 +101,7 @@ async function search(term) {
   });
   console.log('new term', term);
   searchResponse.hits.forEach((hit) => console.log(hit.score, hit.document.uri));
-  return searchResponse.hits.map((hit) => ({ matches: [term, ...term.split(' ')], page: hit.document }));
+  return searchResponse.hits.map((hit) => ({ score: hit.score, matches: [term, ...term.split(' ')], page: hit.document }));
 }
 
 export { init, search };
