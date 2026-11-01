@@ -10,6 +10,7 @@ import { stemmer, language } from "@orama/stemmers/english";
 //import { stopwords as japaneseStopwords } from "@orama/stopwords/japanese";
 
 let searchEngine = null;
+let pageCount = 99;
 
 async function init() {
   async function initIndex(index) {
@@ -62,6 +63,7 @@ async function init() {
       },
     });
     await insertMultiple(searchEngine, index);
+    pageCount = Math.max(index.length, 1);
 
     window.relearn.isSearchEngineReady = true;
     window.relearn.executeInitialSearch();
@@ -87,7 +89,8 @@ async function search(term) {
     term: term,
     properties: '*',
     threshold: 0, // only show results where all keywords were found
-    limit: 99,
+    // all pages found, as their relevance only weighs in afterwards
+    limit: pageCount,
     boost: {
       // doesn't seem to make a difference in score
       tags: 1.8,
@@ -101,7 +104,25 @@ async function search(term) {
   });
   console.log('new term', term);
   searchResponse.hits.forEach((hit) => console.log(hit.score, hit.document.uri));
-  return searchResponse.hits.map((hit) => ({ score: hit.score, matches: [term, ...term.split(' ')], page: hit.document }));
+  // a page's relevance from its front matter weighs in as a factor, the same
+  // with every search adapter; a search naming a section the page is in, by
+  // a title of its breadcrumb or a word of its path within the site, asks for
+  // it, so the page counts in full, like "changelog" for the changelog; the
+  // words as they are, not as the start of another word, like "in" of
+  // "introduction"
+  const separators = /[\s/>._:,-]+/;
+  const typed = term.toLowerCase().split(separators).filter(Boolean);
+  const home = window.relearn.search?.config?.home || '/';
+  const pathOf = (page) => {
+    const uri = page.uri || '';
+    return (uri.indexOf(home) == 0 ? uri.slice(home.length) : uri).replace(/(^|\/)index\.html$/, '');
+  };
+  const asked = (page) =>
+    ((page.breadcrumb || '') + ' ' + pathOf(page))
+      .toLowerCase()
+      .split(separators)
+      .some((word) => typed.includes(word));
+  return searchResponse.hits.map((hit) => ({ score: hit.score * (asked(hit.document) ? 1 : (hit.document.relevance ?? 1)), matches: [term, ...term.split(' ')], page: hit.document })).sort((a, b) => b.score - a.score);
 }
 
 export { init, search };
