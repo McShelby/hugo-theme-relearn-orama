@@ -107,22 +107,22 @@ async function search(term) {
   // a page's relevance from its front matter weighs in as a factor, the same
   // with every search adapter; a search naming a section the page is in, by
   // a title of its breadcrumb or a word of its path within the site, asks for
-  // it, so the page counts in full, like "changelog" for the changelog; the
-  // words as they are, not as the start of another word, like "in" of
-  // "introduction"
+  // it, so a page ranked lower counts in full, like "changelog" for the
+  // changelog; the words as they are, not as the start of another word, like
+  // "in" of "introduction"
   const separators = /[\s/>._:,-]+/;
   const typed = term.toLowerCase().split(separators).filter(Boolean);
   const home = window.relearn.search?.config?.home || '/';
   const pathOf = (page) => {
     const uri = page.uri || '';
-    return (uri.indexOf(home) == 0 ? uri.slice(home.length) : uri).replace(/(^|\/)index\.html$/, '');
+    return (uri.indexOf(home) == 0 ? uri.slice(home.length) : uri).replace(/(^|\/)index\.html$|\.html$/, '');
   };
   const asked = (page) =>
     ((page.breadcrumb || '') + ' ' + pathOf(page))
       .toLowerCase()
       .split(separators)
       .some((word) => typed.includes(word));
-  return searchResponse.hits.map((hit) => ({ score: hit.score * (asked(hit.document) ? 1 : (hit.document.relevance ?? 1)), matches: [term, ...term.split(' ')], page: hit.document })).sort((a, b) => b.score - a.score);
+  return searchResponse.hits.map((hit) => ({ score: hit.score * (asked(hit.document) ? Math.max(hit.document.relevance ?? 1, 1) : (hit.document.relevance ?? 1)), matches: [term, ...term.split(' ')], page: hit.document })).sort((a, b) => b.score - a.score);
 }
 
 export { init, search };
